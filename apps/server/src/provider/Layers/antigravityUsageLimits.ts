@@ -17,7 +17,14 @@ import {
 const GOOGLE_TOKEN_URL = "https://oauth2.googleapis.com/token";
 const GOOGLE_USERINFO_URL = "https://www.googleapis.com/oauth2/v2/userinfo";
 const QUOTA_SUMMARY_URL = "https://cloudcode-pa.googleapis.com/v1internal:retrieveUserQuotaSummary";
-const WEEK_MINS = 7 * 24 * 60;
+const BUCKET_WINDOWS: Record<
+  string,
+  Pick<ServerProviderUsageWindow, "kind" | "label" | "windowDurationMins">
+> = {
+  "5h": { kind: "session", label: "Session", windowDurationMins: 5 * 60 },
+  weekly: { kind: "weekly", label: "Weekly", windowDurationMins: 7 * 24 * 60 },
+  monthly: { kind: "monthly", label: "Monthly" },
+};
 
 const AcpToken = Schema.Struct({
   client_id: Schema.String,
@@ -72,18 +79,16 @@ function antigravityQuotaSummaryToLimits(
       const id = bucket.bucketId?.trim();
       const remaining = bucket.remainingFraction;
       if (!id || remaining === undefined || !Number.isFinite(remaining)) return [];
-      const kind =
-        bucket.window === "weekly" ? "weekly" : bucket.window === "monthly" ? "monthly" : "other";
-      const period = kind === "weekly" ? "Weekly" : kind === "monthly" ? "Monthly" : bucket.window;
+      const window = bucket.window ? BUCKET_WINDOWS[bucket.window] : undefined;
       const reset = bucket.resetTime ? DateTime.make(bucket.resetTime) : Option.none();
       return [
         {
           id,
-          kind,
-          label: [period, scope].filter(Boolean).join(" · ") || id,
+          kind: window?.kind ?? "other",
+          label: [window?.label ?? bucket.window, scope].filter(Boolean).join(" · ") || id,
           usedPercent: clampPercent((1 - remaining) * 100),
           ...(Option.isSome(reset) ? { resetsAt: DateTime.formatIso(reset.value) } : {}),
-          ...(kind === "weekly" ? { windowDurationMins: WEEK_MINS } : {}),
+          ...(window?.windowDurationMins ? { windowDurationMins: window.windowDurationMins } : {}),
         },
       ];
     });
