@@ -1,0 +1,40 @@
+apps/server/src/provider/Layers/antigravityUsageLimits.ts
+  s_b19641f3e482df::t_55fa58421d364c 1-112,115-125
+  s_b19641f3e482df::t_2540f4735bcac7 113-114
+apps/server/src/provider/Drivers/AntigravityDriver.test.ts
+  s_be6f432af033bb::t_5fa9ab6914e88a 22,266-271
+apps/server/src/provider/Drivers/AntigravityDriver.ts
+  s_b19641f3e482df::t_8b875914765190 18,35,58,80,98,398-404
+apps/server/src/provider/Layers/AntigravityProvider.ts
+  s_b19641f3e482df::t_db825091d4789e 9,33,128,198-203,207-214,246,369,372-389,391
+apps/server/src/provider/antigravityAuthSupport.ts
+  s_b19641f3e482df::t_14b319bf16268f 113-116,361
+docs/internals/providers.md
+  s_b19641f3e482df::t_acf797991bdd69 57-63,69
+docs/user/usage.md
+  s_b19641f3e482df::t_62191478ced7c5 109-112
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.4",
+  "base_commit_sha": "2855ea2bf45a4fe00c5793453fd1c304ad6b4db8",
+  "prompts": {},
+  "sessions": {
+    "s_b19641f3e482df": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "e92e3419-a714-420b-a716-715a84822359",
+        "model": "claude-opus-5-5"
+      },
+      "human_author": "Szymon Sypniewicz <22638839+Newarr@users.noreply.github.com>"
+    },
+    "s_be6f432af033bb": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a10134-73e7-7da3-8693-687cacc08027",
+        "model": "gpt-6-astra"
+      },
+      "human_author": "Szymon Sypniewicz <22638839+Newarr@users.noreply.github.com>"
+    }
+  }
+}
