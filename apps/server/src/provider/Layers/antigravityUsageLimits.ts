@@ -15,6 +15,7 @@ import {
 } from "../providerUsageLimits.ts";
 
 const GOOGLE_TOKEN_URL = "https://oauth2.googleapis.com/token";
+const GOOGLE_USERINFO_URL = "https://www.googleapis.com/oauth2/v2/userinfo";
 const QUOTA_SUMMARY_URL = "https://cloudcode-pa.googleapis.com/v1internal:retrieveUserQuotaSummary";
 const WEEK_MINS = 7 * 24 * 60;
 
@@ -28,20 +29,16 @@ const AccessToken = Schema.Struct({
   access_token: Schema.String,
   id_token: Schema.optional(Schema.String),
 });
+const GoogleUserInfo = Schema.Struct({ id: Schema.String });
 const decodeIdTokenClaims = Schema.decodeUnknownOption(
   Schema.fromJsonString(Schema.Struct({ sub: Schema.String })),
 );
 
-// Antigravity's sign-in grants the openid scope, so Google's refresh response includes an ID
-// token whose `sub` claim identifies the account. Without one, pooled limits count each instance
-// separately.
-function googleAccountFingerprint(idToken: string | undefined) {
+function idTokenSubject(idToken: string | undefined) {
   const payload = idToken?.split(".")[1];
   if (!payload) return undefined;
   const claims = decodeIdTokenClaims(Buffer.from(payload, "base64url").toString("utf8"));
-  return Option.isSome(claims)
-    ? NodeCrypto.createHash("sha256").update("antigravity\0").update(claims.value.sub).digest("hex")
-    : undefined;
+  return Option.isSome(claims) ? claims.value.sub : undefined;
 }
 
 const QuotaSummary = Schema.Struct({
@@ -137,10 +134,28 @@ export const readAntigravityUsageLimits = Effect.fn("readAntigravityUsageLimits"
           Effect.flatMap(HttpClientResponse.filterStatusOk),
           Effect.flatMap(HttpClientResponse.schemaBodyJson(QuotaSummary)),
         );
+      // Google sends an ID token only when the sign-in granted the openid scope. The userinfo `id`
+      // is the same Google account ID as the ID token's `sub` claim.
+      const accountId =
+        idTokenSubject(token.id_token) ??
+        (yield* client
+          .execute(
+            HttpClientRequest.get(GOOGLE_USERINFO_URL).pipe(
+              HttpClientRequest.bearerToken(token.access_token),
+            ),
+          )
+          .pipe(
+            Effect.flatMap(HttpClientResponse.filterStatusOk),
+            Effect.flatMap(HttpClientResponse.schemaBodyJson(GoogleUserInfo)),
+            Effect.map((user) => user.id),
+            Effect.orElseSucceed(() => undefined),
+          ));
       return antigravityQuotaSummaryToLimits(
         summary,
         checkedAt,
-        googleAccountFingerprint(token.id_token),
+        accountId
+          ? NodeCrypto.createHash("sha256").update("antigravity\0").update(accountId).digest("hex")
+          : undefined,
       );
     }).pipe(
       Effect.timeout("15 seconds"),

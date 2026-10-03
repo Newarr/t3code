@@ -321,7 +321,13 @@ export const makeAntigravityProvider = Effect.fn("makeAntigravityProvider")(func
         },
       } satisfies AntigravityProviderState;
     });
-    if (before.draft.auth.status !== "authenticated" && options.readUsageLimits) {
+  });
+
+  const onSignedIn = Effect.fn("AntigravityProvider.onSignedIn")(function* (
+    started: AcpSessionRuntimeStartResult,
+  ) {
+    yield* onSessionStarted(started);
+    if (options.readUsageLimits) {
       yield* managed.refresh.pipe(Effect.ignoreCause({ log: true }), Effect.forkIn(scope));
     }
   });
@@ -426,6 +432,7 @@ export const makeAntigravityProvider = Effect.fn("makeAntigravityProvider")(func
   return {
     snapshot: { ...managed, getSnapshot },
     onSessionStarted,
+    onSignedIn,
     onConfigOptionsUpdated,
     onAvailableCommands,
     onSignedOut: clearAccountMetadata(),

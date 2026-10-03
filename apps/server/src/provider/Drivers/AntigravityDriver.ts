@@ -317,7 +317,7 @@ export const AntigravityDriver: ProviderDriver<AntigravitySettings, AntigravityD
         runtime: Pick<AcpSessionRuntime["Service"], "getEvents" | "drainEvents">,
       ): Effect.Effect<void> =>
         Effect.gen(function* () {
-          yield* provider.onSessionStarted(started);
+          yield* provider.onSignedIn(started);
           yield* Stream.runForEach(runtime.getEvents(), (event) => {
             if (event._tag === "EventStreamBarrier") {
               return Deferred.succeed(event.acknowledge, undefined).pipe(Effect.asVoid);
