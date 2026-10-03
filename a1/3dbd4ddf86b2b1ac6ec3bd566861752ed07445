@@ -1,0 +1,23 @@
+apps/server/src/provider/Drivers/AntigravityDriver.ts
+  s_b19641f3e482df::t_04bbc089b1576b 320
+apps/server/src/provider/Layers/AntigravityProvider.ts
+  s_b19641f3e482df::t_67f71ae93e056a 324-330,435
+apps/server/src/provider/Layers/antigravityUsageLimits.ts
+  s_b19641f3e482df::t_58709ff7650444 18,32,37,41,137-152,156-158
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.4",
+  "base_commit_sha": "a13dbd4ddf86b2b1ac6ec3bd566861752ed07445",
+  "prompts": {},
+  "sessions": {
+    "s_b19641f3e482df": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "e92e3419-a714-420b-a716-715a84822359",
+        "model": "claude-opus-5-5"
+      },
+      "human_author": "Szymon Sypniewicz <22638839+Newarr@users.noreply.github.com>"
+    }
+  }
+}
