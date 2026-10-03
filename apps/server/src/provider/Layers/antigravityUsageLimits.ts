@@ -110,12 +110,7 @@ export const readAntigravityUsageLimits = Effect.fn("readAntigravityUsageLimits"
       const token = yield* client
         .execute(
           HttpClientRequest.post(GOOGLE_TOKEN_URL).pipe(
-            HttpClientRequest.bodyUrlParams({
-              client_id: credential.client_id,
-              client_secret: credential.client_secret,
-              refresh_token: credential.refresh_token,
-              grant_type: "refresh_token",
-            }),
+            HttpClientRequest.bodyUrlParams({ ...credential, grant_type: "refresh_token" }),
           ),
         )
         .pipe(
