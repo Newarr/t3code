@@ -64,7 +64,7 @@ const QuotaSummary = Schema.Struct({
 function antigravityQuotaSummaryToLimits(
   summary: typeof QuotaSummary.Type,
   checkedAt: string,
-  credentialFingerprint: string | undefined,
+  credentialFingerprint: string,
 ) {
   const windows = (summary.groups ?? []).flatMap((group) => {
     const scope = group.displayName?.replace(/\s+models$/i, "").trim();
@@ -91,7 +91,7 @@ function antigravityQuotaSummaryToLimits(
   return windows.length > 0
     ? {
         ...makeUsageLimits({ checkedAt, windows }),
-        ...(credentialFingerprint ? { credentialFingerprint } : {}),
+        credentialFingerprint,
       }
     : makeUnavailableUsageLimits({ checkedAt, reason: "unsupported" });
 }
@@ -148,14 +148,11 @@ export const readAntigravityUsageLimits = Effect.fn("readAntigravityUsageLimits"
             Effect.flatMap(HttpClientResponse.filterStatusOk),
             Effect.flatMap(HttpClientResponse.schemaBodyJson(GoogleUserInfo)),
             Effect.map((user) => user.id),
-            Effect.orElseSucceed(() => undefined),
           ));
       return antigravityQuotaSummaryToLimits(
         summary,
         checkedAt,
-        accountId
-          ? NodeCrypto.createHash("sha256").update("antigravity\0").update(accountId).digest("hex")
-          : undefined,
+        NodeCrypto.createHash("sha256").update("antigravity\0").update(accountId).digest("hex"),
       );
     }).pipe(
       Effect.timeout("15 seconds"),
