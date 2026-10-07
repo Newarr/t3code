@@ -15,8 +15,8 @@ import * as Path from "effect/Path";
 import * as Schema from "effect/Schema";
 import * as Scope from "effect/Scope";
 import * as Stream from "effect/Stream";
-import { HttpClient } from "effect/unstable/http";
-import * as ChildProcessSpawner from "effect/unstable/process/ChildProcessSpawner";
+import { HttpClient } from "effect/http";
+import * as ChildProcessSpawner from "effect/process/ChildProcessSpawner";
 import type { AcpError } from "effect-acp/errors";
 
 import * as BackgroundPolicy from "../../background/BackgroundPolicy.ts";
@@ -54,9 +54,9 @@ import * as ProviderContinuationRequests from "../../orchestration-v2/ProviderCo
 import { makeAntigravityAdapterV2 } from "../../orchestration-v2/Adapters/AntigravityAdapterV2.ts";
 import { makeAcpNativeLoggerFactory } from "../acp/AcpNativeLogging.ts";
 import { ProviderDriverError } from "../Errors.ts";
-import { makeAntigravityProvider } from "../Layers/AntigravityProvider.ts";
-import { readAntigravityUsageLimits } from "../Layers/antigravityUsageLimits.ts";
-import * as ProviderEventLoggers from "../Layers/ProviderEventLoggers.ts";
+import { makeAntigravityProvider } from "../AntigravityProvider.ts";
+import { readAntigravityUsageLimits } from "../antigravityUsageLimits.ts";
+import * as ProviderEventLoggers from "../ProviderEventLoggers.ts";
 import * as ModelManifest from "../ModelManifest.ts";
 import {
   defaultProviderContinuationIdentity,
@@ -401,6 +401,7 @@ export const AntigravityDriver: ProviderDriver<AntigravitySettings, AntigravityD
         }).pipe(
           Effect.provideService(FileSystem.FileSystem, fileSystem),
           Effect.provideService(HttpClient.HttpClient, httpClient),
+          Effect.provideService(Crypto.Crypto, crypto),
         ),
       }).pipe(
         Effect.mapError(
